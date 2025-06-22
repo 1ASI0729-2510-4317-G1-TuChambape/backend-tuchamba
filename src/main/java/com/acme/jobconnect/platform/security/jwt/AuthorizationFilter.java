@@ -42,7 +42,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
         // Extraemos el token del prefijo "Bearer "
         String token = authHeader.substring(7);
 
-        // PARA ELIMINAR ESPACIOS ACCIDENTALES
+
         token = token.trim();
 
         final String username = tokenService.getUsernameFromToken(token);
