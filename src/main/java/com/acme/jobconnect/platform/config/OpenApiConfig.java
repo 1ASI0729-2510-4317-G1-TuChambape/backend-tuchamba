@@ -28,7 +28,7 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")            // El formato del token es JWT
                         )
                 )
-                // Define la información general de la API que se mostrará en la parte superior
+                // Define la información general de la API
                 .info(new Info()
                         .title("JobConnect Platform API")
                         .version("v1.0.0")
