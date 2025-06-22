@@ -17,7 +17,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        // Spring Security llama a este metodo con el "username", que para nosotros es el email.
+        // Spring Security llama a este metodo con el "username".
         var user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));
 
