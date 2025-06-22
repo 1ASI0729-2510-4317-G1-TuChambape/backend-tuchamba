@@ -14,7 +14,7 @@ import java.util.Date;
 @Service
 public class TokenServiceImpl {
 
-    // Inyecta el valor de la propiedad 'jwt.secret' de application.properties
+    // Inyecta el valor de la propiedad 'jwt.secret'
     @Value("${jwt.secret}")
     private String secret;
 
