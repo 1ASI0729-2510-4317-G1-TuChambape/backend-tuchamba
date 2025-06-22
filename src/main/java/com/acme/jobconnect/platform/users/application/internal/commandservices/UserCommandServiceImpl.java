@@ -39,7 +39,7 @@ public class UserCommandServiceImpl implements UserCommandService {
         userRepository.findByEmail(command.email()).ifPresent(user -> {
             user.generateResetToken();
             userRepository.save(user);
-            // En un proyecto real, aquí se enviaría un email con el token: user.getResetToken()
+
             // Para nuestra prueba, lo imprimimos en la consola.
             System.out.println("Generated Reset Token for user " + user.getEmail() + ": " + user.getResetToken());
         });
