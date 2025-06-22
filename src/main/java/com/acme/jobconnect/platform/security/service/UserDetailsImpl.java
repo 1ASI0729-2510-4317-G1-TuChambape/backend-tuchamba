@@ -17,7 +17,7 @@ public class UserDetailsImpl implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
 
-        // Convierte el Set de roles (Strings) a una Colección de GrantedAuthority
+        // Convierte el Set de roles a una Colección de GrantedAuthority
         return user.getRoles().stream()
                 .map(SimpleGrantedAuthority::new)
                 .collect(Collectors.toList());
