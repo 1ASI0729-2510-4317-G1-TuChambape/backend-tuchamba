@@ -32,22 +32,6 @@ public class User extends AbstractAggregateRoot<User> {
     @Column(name = "role")
     private Set<String> roles = new HashSet<>();
 
-    // --- Campos del Perfil ---
-    private String firstName;
-    private String lastName;
-    private String documentType;
-    private String documentNumber;
-
-    @Temporal(TemporalType.DATE)
-    private Date birthDate;
-
-    private String gender;
-    private String phone;
-    private String country;
-    private String city;
-    private String address;
-
-    // --- Campos para Recuperar Contraseña ---
     @Column(name = "reset_token")
     private String resetToken;
 
@@ -55,40 +39,24 @@ public class User extends AbstractAggregateRoot<User> {
     @Temporal(TemporalType.TIMESTAMP)
     private Date resetTokenExpiry;
 
-    // --- Campos de Auditoría Incrustados ---
     @Embedded
     private AuditableModel audit = new AuditableModel();
 
+    public User() {}
 
-    // --- Constructores ---
-    public User() {
-    }
-
-    public User(String email, String password) {
+    public User(String email, String password, Set<String> roles) {
         this.email = email;
         this.password = password;
-        this.roles.add("ROLE_USER");
+        this.roles = roles;
     }
 
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
-    // --- Setters para Actualizar el Perfil y la Contraseña ---
-    public void setPassword(String password) { this.password = password; }
-    public void setFirstName(String firstName) { this.firstName = firstName; }
-    public void setLastName(String lastName) { this.lastName = lastName; }
-    public void setDocumentType(String documentType) { this.documentType = documentType; }
-    public void setDocumentNumber(String documentNumber) { this.documentNumber = documentNumber; }
-    public void setBirthDate(Date birthDate) { this.birthDate = birthDate; }
-    public void setGender(String gender) { this.gender = gender; }
-    public void setPhone(String phone) { this.phone = phone; }
-    public void setCountry(String country) { this.country = country; }
-    public void setCity(String city) { this.city = city; }
-    public void setAddress(String address) { this.address = address; }
-
-
-    // --- Métodos de Ayuda para el Token de Reseteo ---
     public void generateResetToken() {
         this.resetToken = UUID.randomUUID().toString();
-        this.resetTokenExpiry = new Date(System.currentTimeMillis() + 3600000); // 1 hora
+        this.resetTokenExpiry = new Date(System.currentTimeMillis() + 3600000);
     }
 
     public void clearResetToken() {

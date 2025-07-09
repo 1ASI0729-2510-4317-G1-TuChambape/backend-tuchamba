@@ -1,4 +1,12 @@
 package com.acme.jobconnect.platform.users.domain.model.commands;
 
-public record SignUpCommand(String email, String password) {
+import java.util.Set;
+
+public record SignUpCommand(
+        String firstName,
+        String lastName,
+        String email,
+        String password,
+        Set<String> roles
+) {
 }

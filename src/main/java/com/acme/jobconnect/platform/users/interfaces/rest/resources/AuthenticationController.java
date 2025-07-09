@@ -14,7 +14,6 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -36,25 +35,26 @@ public class AuthenticationController {
         this.userRepository = userRepository;
     }
 
-    /**
-     * Handles the sign-up request.
-     */
     @PostMapping("/sign-up")
     public ResponseEntity<UserResource> signUp(@RequestBody SignUpRequest signUpRequest) {
-        var signUpCommand = new SignUpCommand(signUpRequest.email(), signUpRequest.password());
+        // ========= CORRECCIÓN AQUÍ: Pasamos todos los argumentos necesarios =========
+        var signUpCommand = new SignUpCommand(
+                signUpRequest.firstName(),
+                signUpRequest.lastName(),
+                signUpRequest.email(),
+                signUpRequest.password(),
+                signUpRequest.roles()
+        );
+
         var userId = userCommandService.handle(signUpCommand);
-        if (userId == null) {
-            return ResponseEntity.badRequest().build();
-        }
+        if (userId == null) { return ResponseEntity.badRequest().build(); }
         var user = userRepository.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found after creation"));
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user);
         return new ResponseEntity<>(userResource, HttpStatus.CREATED);
     }
 
-    /**
-     * Handles the sign-in request.
-     */
+    // El resto de los métodos no cambian
     @PostMapping("/sign-in")
     public ResponseEntity<SignInResponse> signIn(@RequestBody SignInRequest signInRequest) {
         var authentication = authenticationManager.authenticate(
@@ -64,9 +64,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(new SignInResponse(token));
     }
 
-    /**
-     * Handles the forgot-password request.
-     */
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
         var forgotPasswordCommand = new ForgotPasswordCommand(forgotPasswordRequest.email());
@@ -74,9 +71,6 @@ public class AuthenticationController {
         return ResponseEntity.ok("If a user with that email exists, a reset token has been generated.");
     }
 
-    /**
-     * Handles the verify-token request.
-     */
     @PostMapping("/verify-code")
     public ResponseEntity<VerifyTokenResponse> verifyToken(@RequestBody VerifyTokenRequest verifyTokenRequest) {
         var verifyTokenCommand = new VerifyResetTokenCommand(verifyTokenRequest.resetToken());
@@ -84,9 +78,6 @@ public class AuthenticationController {
         return ResponseEntity.ok(new VerifyTokenResponse(isTokenValid));
     }
 
-    /**
-     * Handles the reset-password request.
-     */
     @PostMapping("/reset-password")
     public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest) {
         var resetPasswordCommand = new ResetPasswordCommand(

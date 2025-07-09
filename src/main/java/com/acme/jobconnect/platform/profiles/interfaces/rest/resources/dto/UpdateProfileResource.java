@@ -1,10 +1,8 @@
-package com.acme.jobconnect.platform.users.interfaces.rest.resources.dto;
+package com.acme.jobconnect.platform.profiles.interfaces.rest.resources.dto;
 
 import java.util.Date;
 
-public record ProfileResource(
-        Long id,
-        String email,
+public record UpdateProfileResource(
         String firstName,
         String lastName,
         String documentType,

@@ -10,6 +10,7 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -31,20 +32,25 @@ public class WebSecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Desactivar CSRF, ya que usamos JWT y no sesiones
+                .csrf(AbstractHttpConfigurer::disable)
+                // Configurar las reglas de autorización para cada ruta
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers(
-                                "/api/v1/authentication/**",
-                                "/v3/api-docs/**",
-                                "/swagger-ui/**",
+                                "/api/v1/authentication/**", // Permitir todo en /authentication
+                                "/v3/api-docs/**",         // Permitir acceso a la documentación de OpenAPI
+                                "/swagger-ui/**",           // Permitir acceso a la UI de Swagger
                                 "/swagger-ui.html"
-                        ).permitAll()
-
-                        .anyRequest().hasRole("USER")
+                        ).permitAll() // Estas rutas no requieren autenticación
+                        .anyRequest().authenticated() // Cualquier otra ruta debe ser autenticada
                 )
+                // Configurar la gestión de sesiones como SIN ESTADO (stateless)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                // Registrar nuestro proveedor de autenticación personalizado
                 .authenticationProvider(authenticationProvider())
+                // Añadir nuestro filtro de autorización JWT antes del filtro de usuario/contraseña
                 .addFilterBefore(authorizationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 
