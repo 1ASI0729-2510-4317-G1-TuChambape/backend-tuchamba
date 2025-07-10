@@ -5,6 +5,7 @@ import com.acme.jobconnect.platform.offers.domain.model.valueobjects.Rating;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Date;
 
@@ -32,9 +33,11 @@ public class Review {
     private boolean isVerifiedAuthor;
 
     @Embedded
+    @Setter
     private Rating rating;
 
     @Size(max = 1000) // Approx 150 words as per requirement
+    @Setter
     private String comment;
 
     public Review() {}
