@@ -8,9 +8,7 @@ public class WorkerResourceFromEntityAssembler {
         if (entity == null) {
             return null;
         }
-
         var availabilityResource = AvailabilityResourceFromEntityAssembler.toResourceFromEntity(entity.getAvailability());
-
         return new WorkerResource(
                 entity.getId(),
                 entity.getEmail(),
@@ -23,7 +21,7 @@ public class WorkerResourceFromEntityAssembler {
                 entity.getSkills(),
                 entity.getExperience(),
                 entity.getCertifications(),
-                entity.getRating() != null ? entity.getRating().getRating() : null,
+                entity.getRating().getRating(),
                 entity.getReviewCount(),
                 entity.isVerified(),
                 availabilityResource,

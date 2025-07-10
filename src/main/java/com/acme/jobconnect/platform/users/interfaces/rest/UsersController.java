@@ -1,17 +1,15 @@
 package com.acme.jobconnect.platform.users.interfaces.rest;
 
+import com.acme.jobconnect.platform.users.domain.model.commands.CreateUserCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.DeleteUserCommand;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetAllUsersQuery;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetUserByAccountIdQuery;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetUserByIdQuery;
 import com.acme.jobconnect.platform.users.domain.service.UserCommandService;
 import com.acme.jobconnect.platform.users.domain.service.UserQueryService;
-import com.acme.jobconnect.platform.users.interfaces.rest.resources.CreateCustomerResource;
 import com.acme.jobconnect.platform.users.interfaces.rest.resources.CreateUserResource;
-import com.acme.jobconnect.platform.users.interfaces.rest.resources.CreateWorkerResource;
 import com.acme.jobconnect.platform.users.interfaces.rest.resources.UserResource;
-import com.acme.jobconnect.platform.users.interfaces.rest.transform.CreateCustomerCommandFromResourceAssembler;
 import com.acme.jobconnect.platform.users.interfaces.rest.transform.CreateUserCommandFromResourceAssembler;
-import com.acme.jobconnect.platform.users.interfaces.rest.transform.CreateWorkerCommandFromResourceAssembler;
 import com.acme.jobconnect.platform.users.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -37,20 +35,6 @@ public class UsersController {
         var user = userQueryService.handle(new GetUserByIdQuery(userId)).orElseThrow();
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user);
         return new ResponseEntity<>(userResource, HttpStatus.CREATED);
-    }
-
-    @PostMapping("/workers")
-    public ResponseEntity<Long> createWorkerProfile(@RequestBody CreateWorkerResource resource) {
-        var command = CreateWorkerCommandFromResourceAssembler.toCommandFromResource(resource);
-        var workerId = userCommandService.handle(command);
-        return new ResponseEntity<>(workerId.get(), HttpStatus.CREATED);
-    }
-
-    @PostMapping("/customers")
-    public ResponseEntity<Long> createCustomerProfile(@RequestBody CreateCustomerResource resource) {
-        var command = CreateCustomerCommandFromResourceAssembler.toCommandFromResource(resource);
-        var customerId = userCommandService.handle(command);
-        return new ResponseEntity<>(customerId.get(), HttpStatus.CREATED);
     }
 
     @GetMapping
@@ -83,5 +67,12 @@ public class UsersController {
         }
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
         return ResponseEntity.ok(userResource);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        var command = new DeleteUserCommand(id);
+        userCommandService.handle(command);
+        return ResponseEntity.noContent().build();
     }
 } 

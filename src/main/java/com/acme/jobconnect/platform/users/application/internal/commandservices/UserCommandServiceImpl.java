@@ -4,8 +4,14 @@ import com.acme.jobconnect.platform.users.domain.model.aggregates.User;
 import com.acme.jobconnect.platform.users.domain.model.commands.CreateCustomerProfileCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.CreateWorkerProfileCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.CreateUserCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.DeleteCustomerCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.DeleteUserCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.DeleteWorkerCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.UpdateCustomerCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.UpdateWorkerCommand;
 import com.acme.jobconnect.platform.users.domain.model.aggregates.Customer;
 import com.acme.jobconnect.platform.users.domain.model.aggregates.Worker;
+import com.acme.jobconnect.platform.users.domain.model.entities.Availability;
 import com.acme.jobconnect.platform.users.domain.service.UserCommandService;
 import com.acme.jobconnect.platform.users.infrastructure.persistence.jpa.repositories.CustomerRepository;
 import com.acme.jobconnect.platform.users.infrastructure.persistence.jpa.repositories.UserRepository;
@@ -99,5 +105,78 @@ public class UserCommandServiceImpl implements UserCommandService {
         userRepository.save(user);
 
         return Optional.of(user.getId());
+    }
+
+    @Override
+    public Optional<Long> handle(UpdateWorkerCommand command) {
+        var worker = workerRepository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Worker with id " + command.id() + " not found"));
+
+        worker.setFirstName(command.firstName());
+        worker.setLastName(command.lastName());
+        worker.setPhone(command.phone());
+        worker.setAvatar(command.avatar());
+        worker.setLocation(command.location());
+        worker.setBio(command.bio());
+        worker.setSkills(command.skills());
+        worker.setExperience(command.experience());
+        worker.setCertifications(command.certifications());
+        var availability = new Availability(
+                command.monday(),
+                command.tuesday(),
+                command.wednesday(),
+                command.thursday(),
+                command.friday(),
+                command.saturday(),
+                command.sunday()
+        );
+        worker.setAvailability(availability);
+        worker.setYapeNumber(command.yapeNumber());
+        worker.setPlinNumber(command.plinNumber());
+        worker.setBankAccountNumber(command.bankAccountNumber());
+
+        workerRepository.save(worker);
+
+        return Optional.of(worker.getId());
+    }
+
+    @Override
+    public void handle(DeleteWorkerCommand command) {
+        if (!workerRepository.existsById(command.id())) {
+            throw new IllegalArgumentException("Worker with id " + command.id() + " not found");
+        }
+        workerRepository.deleteById(command.id());
+    }
+
+    @Override
+    public void handle(DeleteUserCommand command) {
+        if (!userRepository.existsById(command.id())) {
+            throw new IllegalArgumentException("User with id " + command.id() + " not found");
+        }
+        userRepository.deleteById(command.id());
+    }
+
+    @Override
+    public Optional<Long> handle(UpdateCustomerCommand command) {
+        var customer = customerRepository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Customer with id " + command.id() + " not found"));
+
+        customer.setFirstName(command.firstName());
+        customer.setLastName(command.lastName());
+        customer.setPhone(command.phone());
+        customer.setLocation(command.location());
+        customer.setBio(command.bio());
+
+        customerRepository.save(customer);
+
+        return Optional.of(customer.getId());
+    }
+
+    @Override
+    public void handle(DeleteCustomerCommand command) {
+        if (!customerRepository.existsById(command.id())) {
+            throw new IllegalArgumentException("Customer with id " + command.id() + " not found");
+        }
+        customerRepository.deleteById(command.id());
     }
 } 

@@ -8,7 +8,6 @@ public class CustomerResourceFromEntityAssembler {
         if (entity == null) {
             return null;
         }
-        var preferencesResource = PreferencesResourceFromEntityAssembler.toResourceFromEntity(entity.getPreferences());
         return new CustomerResource(
                 entity.getId(),
                 entity.getEmail(),
@@ -17,8 +16,7 @@ public class CustomerResourceFromEntityAssembler {
                 entity.getPhone(),
                 entity.getLocation(),
                 entity.getBio(),
-                entity.isVerified(),
-                preferencesResource
+                entity.isVerified()
         );
     }
 } 
