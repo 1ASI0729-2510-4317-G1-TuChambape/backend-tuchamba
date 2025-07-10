@@ -26,9 +26,9 @@ public class Proposal extends AuditableAbstractAggregateRoot<Proposal> {
             throw new IllegalArgumentException("Message cant 't be empty");
         }
         try {
-            this.Status = ProposalStatus.valueOf(command.status().toUpperCase());
+            this.status = ProposalStatus.valueOf(command.status().toUpperCase());
         } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Status Proposal invalid: " + command.status() + ". Allowe Value: PENDING, ACCEPTED, REJECTED, CANCELLED.");
+            throw new IllegalArgumentException("Status Proposal invalid: " + command.status() + ". Allowe Value: PENDING, ACCEPTED, REJECTED.");
         }
         this.Price = new Money(command.price());
 
@@ -36,7 +36,8 @@ public class Proposal extends AuditableAbstractAggregateRoot<Proposal> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long Id;
+    @Column(name = "id")
+    private Long id;
 
     @OneToOne
     @JoinColumn(name = "offer_id", nullable = false)
@@ -55,13 +56,22 @@ public class Proposal extends AuditableAbstractAggregateRoot<Proposal> {
     public Money Price;
 
     @Enumerated(EnumType.STRING)
-    public ProposalStatus Status;
+    @Column(name = "status")
+    private ProposalStatus status;
+
+    public void accept() {
+        this.status = ProposalStatus.ACCEPTED;
+    }
+
+    public void reject() {
+        this.status = ProposalStatus.REJECTED;
+    }
 
     public Proposal() {
         this.offer = null;
         this.worker = null;
         this.Message = "";
         this.Price = new Money();
-        this.Status = ProposalStatus.PENDING;
+        this.status = ProposalStatus.PENDING;
     }
 }

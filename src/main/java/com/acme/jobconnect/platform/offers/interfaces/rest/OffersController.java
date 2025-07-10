@@ -2,15 +2,13 @@ package com.acme.jobconnect.platform.offers.interfaces.rest;
 
 import com.acme.jobconnect.platform.offers.domain.model.commands.DeleteOfferCommand;
 import com.acme.jobconnect.platform.offers.domain.model.commands.UpdateOfferCommand;
-import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByClientIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusAndClientIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusQuery;
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetOfferByIdQuery;
 import com.acme.jobconnect.platform.offers.domain.services.OfferCommandService;
 import com.acme.jobconnect.platform.offers.domain.services.OfferQueryService;
-import com.acme.jobconnect.platform.offers.interfaces.rest.resources.AddReviewResource;
-import com.acme.jobconnect.platform.offers.interfaces.rest.resources.CreateOfferResource;
-import com.acme.jobconnect.platform.offers.interfaces.rest.resources.OfferResource;
-import com.acme.jobconnect.platform.offers.interfaces.rest.resources.ReviewResource;
-import com.acme.jobconnect.platform.offers.interfaces.rest.resources.UpdateOfferResource;
+import com.acme.jobconnect.platform.offers.interfaces.rest.resources.*;
 import com.acme.jobconnect.platform.offers.interfaces.rest.transform.AddReviewCommandFromResourceAssembler;
 import com.acme.jobconnect.platform.offers.interfaces.rest.transform.CreateOfferCommandFromResourceAssembler;
 import com.acme.jobconnect.platform.offers.interfaces.rest.transform.OfferResourceFromEntityAssembler;
@@ -54,15 +52,30 @@ public class OffersController {
         return new ResponseEntity<>(offerResource, HttpStatus.CREATED);
     }
 
-    @GetMapping
-    @Operation(summary = "Get all offers")
-    @ApiResponses(value = {
-            @ApiResponse(responseCode = "200", description = "Offers found"),
-            @ApiResponse(responseCode = "404", description = "Offers not found")
-    })
-    public ResponseEntity<List<OfferResource>> getAllOffers() {
-        var getAllOffersQuery = new GetAllOffersQuery();
-        var offers = offerQueryService.handle(getAllOffersQuery);
+    @GetMapping("/client/{clientId}")
+    public ResponseEntity<List<OfferResource>> getOffersByClientId(@PathVariable Long clientId) {
+        var query = new GetAllOffersByClientIdQuery(clientId);
+        var offers = offerQueryService.handle(query);
+        var offerResources = offers.stream()
+                .map(OfferResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(offerResources);
+    }
+
+    @GetMapping("/client/{clientId}/status/{status}")
+    public ResponseEntity<List<OfferResource>> getOffersByClientIdAndStatus(@PathVariable Long clientId, @PathVariable String status) {
+        var query = new GetAllOffersByStatusAndClientIdQuery(status, clientId);
+        var offers = offerQueryService.handle(query);
+        var offerResources = offers.stream()
+                .map(OfferResourceFromEntityAssembler::toResourceFromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(offerResources);
+    }
+
+    @GetMapping("/status/{status}")
+    public ResponseEntity<List<OfferResource>> getOffersByStatus(@PathVariable String status) {
+        var query = new GetAllOffersByStatusQuery(status);
+        var offers = offerQueryService.handle(query);
         var offerResources = offers.stream()
                 .map(OfferResourceFromEntityAssembler::toResourceFromEntity)
                 .collect(Collectors.toList());

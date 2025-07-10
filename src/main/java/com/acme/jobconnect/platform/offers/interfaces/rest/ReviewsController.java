@@ -1,9 +1,7 @@
 package com.acme.jobconnect.platform.offers.interfaces.rest;
 
 import com.acme.jobconnect.platform.offers.domain.model.commands.DeleteReviewCommand;
-import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllReviewsByAuthorUserIdQuery;
-import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllReviewsByOfferIdQuery;
-import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllReviewsByReviewerUserIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllReviewsQuery;
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetReviewByIdQuery;
 import com.acme.jobconnect.platform.offers.domain.services.ReviewCommandService;
 import com.acme.jobconnect.platform.offers.domain.services.ReviewQueryService;
@@ -24,7 +22,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping(produces = MediaType.APPLICATION_JSON_VALUE)
+@RequestMapping(value = "/api/v1/reviews", produces = MediaType.APPLICATION_JSON_VALUE)
 @RequiredArgsConstructor
 @Tag(name = "Reviews", description = "Review Management Endpoints")
 public class ReviewsController {
@@ -32,9 +30,22 @@ public class ReviewsController {
     private final ReviewCommandService reviewCommandService;
     private final ReviewQueryService reviewQueryService;
 
-    @GetMapping("/api/v1/offers/{offerId}/reviews")
-    public ResponseEntity<List<ReviewResource>> getAllReviewsByOfferId(@PathVariable Long offerId) {
-        var query = new GetAllReviewsByOfferIdQuery(offerId);
+    @PostMapping
+    public ResponseEntity<ReviewResource> createReview(@RequestBody CreateReviewResource resource) {
+        var command = CreateReviewCommandFromResourceAssembler.toCommandFromResource(resource);
+        var reviewId = reviewCommandService.handle(command).orElseThrow();
+        var review = reviewQueryService.handle(new GetReviewByIdQuery(reviewId)).orElseThrow();
+        var reviewResource = ReviewResourceFromEntityAssembler.toResourceFromEntity(review);
+        return new ResponseEntity<>(reviewResource, HttpStatus.CREATED);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReviewResource>> getAllReviews(
+            @RequestParam(required = false) Long offerId,
+            @RequestParam(required = false) Long authorUserId,
+            @RequestParam(required = false) Long reviewerUserId
+    ) {
+        var query = new GetAllReviewsQuery(offerId, authorUserId, reviewerUserId);
         var reviews = reviewQueryService.handle(query);
         var reviewResources = reviews.stream()
                 .map(ReviewResourceFromEntityAssembler::toResourceFromEntity)
@@ -42,7 +53,7 @@ public class ReviewsController {
         return ResponseEntity.ok(reviewResources);
     }
 
-    @GetMapping("/api/v1/reviews/{reviewId}")
+    @GetMapping("/{reviewId}")
     public ResponseEntity<ReviewResource> getReviewById(@PathVariable Long reviewId) {
         var query = new GetReviewByIdQuery(reviewId);
         var review = reviewQueryService.handle(query).orElseThrow();
@@ -50,7 +61,7 @@ public class ReviewsController {
         return ResponseEntity.ok(reviewResource);
     }
 
-    @PutMapping("/api/v1/reviews/{reviewId}")
+    @PutMapping("/{reviewId}")
     public ResponseEntity<ReviewResource> updateReview(@PathVariable Long reviewId, @RequestBody UpdateReviewResource resource) {
         var command = UpdateReviewCommandFromResourceAssembler.toCommandFromResource(reviewId, resource);
         var updatedReviewId = reviewCommandService.handle(command).orElseThrow();
@@ -59,30 +70,10 @@ public class ReviewsController {
         return ResponseEntity.ok(reviewResource);
     }
 
-    @DeleteMapping("/api/v1/reviews/{reviewId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<Void> deleteReview(@PathVariable Long reviewId) {
         var command = new DeleteReviewCommand(reviewId);
         reviewCommandService.handle(command);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping("/api/v1/reviews/reviewer/{reviewerUserId}")
-    public ResponseEntity<List<ReviewResource>> getAllReviewsByReviewerUserId(@PathVariable Long reviewerUserId) {
-        var query = new GetAllReviewsByReviewerUserIdQuery(reviewerUserId);
-        var reviews = reviewQueryService.handle(query);
-        var reviewResources = reviews.stream()
-                .map(ReviewResourceFromEntityAssembler::toResourceFromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(reviewResources);
-    }
-
-    @GetMapping("/api/v1/reviews/author/{authorUserId}")
-    public ResponseEntity<List<ReviewResource>> getAllReviewsByAuthorUserId(@PathVariable Long authorUserId) {
-        var query = new GetAllReviewsByAuthorUserIdQuery(authorUserId);
-        var reviews = reviewQueryService.handle(query);
-        var reviewResources = reviews.stream()
-                .map(ReviewResourceFromEntityAssembler::toResourceFromEntity)
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(reviewResources);
     }
 } 

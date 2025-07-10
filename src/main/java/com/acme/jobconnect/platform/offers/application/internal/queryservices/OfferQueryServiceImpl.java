@@ -1,7 +1,9 @@
 package com.acme.jobconnect.platform.offers.application.internal.queryservices;
 
 import com.acme.jobconnect.platform.offers.domain.model.aggregates.Offer;
-import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByClientIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusAndClientIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusQuery;
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetOfferByIdQuery;
 import com.acme.jobconnect.platform.offers.domain.services.OfferQueryService;
 import com.acme.jobconnect.platform.offers.infrastructure.persistence.jpa.repositories.OfferRepository;
@@ -20,12 +22,22 @@ public class OfferQueryServiceImpl implements OfferQueryService {
     }
 
     @Override
-    public List<Offer> handle(GetAllOffersQuery query) {
-        return offerRepository.findAll();
+    public Optional<Offer> handle(GetOfferByIdQuery query) {
+        return offerRepository.findById(query.offerId());
     }
 
     @Override
-    public Optional<Offer> handle(GetOfferByIdQuery query) {
-        return offerRepository.findById(query.offerId());
+    public List<Offer> handle(GetAllOffersByClientIdQuery query) {
+        return offerRepository.findAllByClientId(query.clientId());
+    }
+
+    @Override
+    public List<Offer> handle(GetAllOffersByStatusAndClientIdQuery query) {
+        return offerRepository.findAllByStatusAndClientId(query.status(), query.clientId());
+    }
+
+    @Override
+    public List<Offer> handle(GetAllOffersByStatusQuery query) {
+        return offerRepository.findAllByStatus(query.status());
     }
 } 

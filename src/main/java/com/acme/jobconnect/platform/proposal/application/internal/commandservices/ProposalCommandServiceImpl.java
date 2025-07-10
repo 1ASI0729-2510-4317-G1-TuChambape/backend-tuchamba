@@ -3,8 +3,9 @@ package com.acme.jobconnect.platform.proposal.application.internal.commandservic
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetOfferByIdQuery;
 import com.acme.jobconnect.platform.offers.infrastructure.persistence.jpa.repositories.OfferRepository;
 import com.acme.jobconnect.platform.proposal.domain.model.aggregates.Proposal;
-import com.acme.jobconnect.platform.proposal.domain.model.commands.CreateProposalCommand;
-import com.acme.jobconnect.platform.proposal.domain.model.commands.DeleteProposalByIdCommand;
+import com.acme.jobconnect.platform.proposal.domain.model.commands.*;
+import com.acme.jobconnect.platform.proposal.domain.model.valueobjects.Money;
+import com.acme.jobconnect.platform.proposal.domain.model.valueobjects.ProposalStatus;
 import com.acme.jobconnect.platform.proposal.domain.services.ProposalCommandService;
 import com.acme.jobconnect.platform.proposal.infrastructure.persistence.jpa.repositories.ProposalRepository;
 import com.acme.jobconnect.platform.users.infrastructure.persistence.jpa.repositories.WorkerRepository;
@@ -50,5 +51,35 @@ public class ProposalCommandServiceImpl implements ProposalCommandService {
         }
         repository.delete(proposal.get());
 
+    }
+
+    @Override
+    public Optional<Proposal> handle(UpdateProposalCommand command) {
+        var proposal = repository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Proposal with id " + command.id() + " not found"));
+        if (command.message() != null && !command.message().isBlank()) {
+            proposal.setMessage(command.message());
+        }
+        proposal.setPrice(new Money(command.price()));
+        repository.save(proposal);
+        return Optional.of(proposal);
+    }
+
+    @Override
+    public Optional<Proposal> handle(AcceptProposalCommand command) {
+        var proposal = repository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Proposal with id " + command.id() + " not found"));
+        proposal.accept();
+        repository.save(proposal);
+        return Optional.of(proposal);
+    }
+
+    @Override
+    public Optional<Proposal> handle(RejectProposalCommand command) {
+        var proposal = repository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("Proposal with id " + command.id() + " not found"));
+        proposal.reject();
+        repository.save(proposal);
+        return Optional.of(proposal);
     }
 }
