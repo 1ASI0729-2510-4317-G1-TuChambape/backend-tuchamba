@@ -1,20 +1,28 @@
 package com.acme.jobconnect.platform.shared.domain.model.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
+import jakarta.persistence.*;
+import lombok.Getter;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.util.Date;
 
-@Embeddable // Indica que esta clase puede ser incrustada en otras entidades
+@EntityListeners(AuditingEntityListener.class)
+@MappedSuperclass
 public class AuditableModel {
+    @Id
+    @Getter
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
+    @Getter
     @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
+    @Column(nullable = false, updatable = false)
     private Date createdAt;
 
+    @Getter
     @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
+    @Column(nullable = false)
     private Date updatedAt;
 }
