@@ -2,14 +2,17 @@ package com.acme.jobconnect.platform.users.interfaces.rest;
 
 import com.acme.jobconnect.platform.users.domain.model.commands.CreateUserCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.DeleteUserCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.UpdateUserCommand;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetAllUsersQuery;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetUserByAccountIdQuery;
 import com.acme.jobconnect.platform.users.domain.model.queries.GetUserByIdQuery;
 import com.acme.jobconnect.platform.users.domain.service.UserCommandService;
 import com.acme.jobconnect.platform.users.domain.service.UserQueryService;
 import com.acme.jobconnect.platform.users.interfaces.rest.resources.CreateUserResource;
+import com.acme.jobconnect.platform.users.interfaces.rest.resources.UpdateUserResource;
 import com.acme.jobconnect.platform.users.interfaces.rest.resources.UserResource;
 import com.acme.jobconnect.platform.users.interfaces.rest.transform.CreateUserCommandFromResourceAssembler;
+import com.acme.jobconnect.platform.users.interfaces.rest.transform.UpdateUserCommandFromResourceAssembler;
 import com.acme.jobconnect.platform.users.interfaces.rest.transform.UserResourceFromEntityAssembler;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
@@ -66,6 +69,15 @@ public class UsersController {
             return ResponseEntity.notFound().build();
         }
         var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user.get());
+        return ResponseEntity.ok(userResource);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<UserResource> updateUser(@PathVariable Long id, @RequestBody UpdateUserResource resource) {
+        var command = UpdateUserCommandFromResourceAssembler.toCommandFromResource(id, resource);
+        var userId = userCommandService.handle(command).orElseThrow();
+        var user = userQueryService.handle(new GetUserByIdQuery(userId)).orElseThrow();
+        var userResource = UserResourceFromEntityAssembler.toResourceFromEntity(user);
         return ResponseEntity.ok(userResource);
     }
 

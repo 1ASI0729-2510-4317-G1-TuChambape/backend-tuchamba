@@ -8,6 +8,7 @@ import com.acme.jobconnect.platform.users.domain.model.commands.DeleteCustomerCo
 import com.acme.jobconnect.platform.users.domain.model.commands.DeleteUserCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.DeleteWorkerCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.UpdateCustomerCommand;
+import com.acme.jobconnect.platform.users.domain.model.commands.UpdateUserCommand;
 import com.acme.jobconnect.platform.users.domain.model.commands.UpdateWorkerCommand;
 import com.acme.jobconnect.platform.users.domain.model.aggregates.Customer;
 import com.acme.jobconnect.platform.users.domain.model.aggregates.Worker;
@@ -138,6 +139,31 @@ public class UserCommandServiceImpl implements UserCommandService {
         workerRepository.save(worker);
 
         return Optional.of(worker.getId());
+    }
+
+    @Override
+    public Optional<Long> handle(UpdateUserCommand command) {
+        var user = userRepository.findById(command.id())
+                .orElseThrow(() -> new IllegalArgumentException("User with id " + command.id() + " not found"));
+
+        Worker worker = null;
+        if (command.workerId() != null) {
+            worker = workerRepository.findById(command.workerId())
+                    .orElseThrow(() -> new IllegalArgumentException("Worker with id " + command.workerId() + " not found"));
+        }
+
+        Customer customer = null;
+        if (command.customerId() != null) {
+            customer = customerRepository.findById(command.customerId())
+                    .orElseThrow(() -> new IllegalArgumentException("Customer with id " + command.customerId() + " not found"));
+        }
+
+        // Update the user's associations
+        user.setWorker(worker);
+        user.setCustomer(customer);
+        userRepository.save(user);
+
+        return Optional.of(user.getId());
     }
 
     @Override

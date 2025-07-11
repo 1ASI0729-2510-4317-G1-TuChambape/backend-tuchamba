@@ -3,10 +3,12 @@ package com.acme.jobconnect.platform.users.domain.model.aggregates;
 import com.acme.jobconnect.platform.shared.domain.model.aggregates.AuditableAbstractAggregateRoot;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 @Entity
 @Table(name = "users")
 @Getter
+@Setter
 public class User extends AuditableAbstractAggregateRoot<User> {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
