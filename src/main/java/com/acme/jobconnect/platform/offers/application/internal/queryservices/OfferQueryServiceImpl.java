@@ -5,6 +5,7 @@ import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByCl
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusAndClientIdQuery;
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetAllOffersByStatusQuery;
 import com.acme.jobconnect.platform.offers.domain.model.queries.GetOfferByIdQuery;
+import com.acme.jobconnect.platform.offers.domain.model.valueobjects.OfferStatus;
 import com.acme.jobconnect.platform.offers.domain.services.OfferQueryService;
 import com.acme.jobconnect.platform.offers.infrastructure.persistence.jpa.repositories.OfferRepository;
 import org.springframework.stereotype.Service;
@@ -33,11 +34,11 @@ public class OfferQueryServiceImpl implements OfferQueryService {
 
     @Override
     public List<Offer> handle(GetAllOffersByStatusAndClientIdQuery query) {
-        return offerRepository.findAllByStatusAndClientId(query.status(), query.clientId());
+        return offerRepository.findAllByStatusAndClientId(OfferStatus.valueOf(query.status()), query.clientId());
     }
 
     @Override
     public List<Offer> handle(GetAllOffersByStatusQuery query) {
-        return offerRepository.findAllByStatus(query.status());
+        return offerRepository.findAllByStatus(OfferStatus.valueOf(query.status()));
     }
 } 
